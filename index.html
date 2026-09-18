@@ -138,6 +138,27 @@ tr:hover td{background:var(--trhover)}
 .lgd{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--tx3);margin-bottom:2px}
 .lgd i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:5px;
   vertical-align:middle}
+/* ---- Lớp phủ BÁM CHUỘT dùng chung cho mọi biểu đồ ------------------------------
+   Trước đây giá trị nằm trong thuộc tính title của từng chấm/cột: trình duyệt đợi ~1
+   giây mới hiện, lại phải rê trúng cái chấm 3px mới ăn — nhìn đường cong 11 kỳ mà muốn
+   đọc số thì gần như không dùng được. Nay: rê vào BẤT KỲ đâu trong khung, hệ thống bắt
+   KỲ GẦN NHẤT rồi kẻ một vạch dọc vào đúng kỳ đó, chấm to lên, và hộp số hiện ngay
+   cạnh con trỏ. Một biểu đồ nhiều đường (rank + số keyword) thì hộp đọc được CẢ HAI ở
+   cùng một kỳ — thứ title không bao giờ làm được. */
+.chw{position:relative}
+.chw .cx,.chw .cxd{display:none;position:absolute;pointer-events:none}
+.chw.on .cx,.chw.on .cxd{display:block}
+.chw .cx{top:0;bottom:0;width:1px;background:var(--tx2);opacity:.5;transform:translateX(-.5px)}
+.chw .cxd{width:9px;height:9px;border-radius:50%;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 0 2px var(--bg2)}
+.tip{position:fixed;z-index:999;display:none;pointer-events:none;background:var(--bg2);
+ border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px;color:var(--tx);
+ box-shadow:0 8px 26px rgba(0,0,0,.34);min-width:136px}
+.tip b{display:block;font-size:11.5px;color:var(--tx3);font-weight:620;margin-bottom:4px}
+.tip s{display:flex;align-items:center;gap:7px;line-height:1.75;white-space:nowrap;text-decoration:none}
+.tip s i{width:8px;height:8px;border-radius:50%;flex:none}
+.tip s em{margin-left:auto;font-style:normal;font-weight:640;font-variant-numeric:tabular-nums}
+.tip u{display:block;text-decoration:none;color:var(--tx3);font-size:11px;margin-top:4px;
+ max-width:210px;white-space:normal;line-height:1.5}
 .note{background:var(--bg3);border-radius:9px;padding:11px 13px;font-size:12.5px;color:var(--tx2);line-height:1.6}
 .note.w{background:rgba(245,165,36,.09);border:1px solid rgba(245,165,36,.24)}
 .kws{display:flex;flex-wrap:wrap;gap:5px}
@@ -199,6 +220,10 @@ tr:hover td{background:var(--trhover)}
 .spk i.pk{background:var(--up-tx)}
 .spk i.rp{background:var(--tm-tx)}
 .spk i.ds{background:var(--acc)}
+/* Vạch + chấm của lớp hover được chèn làm con của .spk, mà .spk là flex — phải kéo
+   chúng ra khỏi luồng flex, không thì thành cột thứ 12 và cả dải bị bóp lại. */
+.spk>i.cx,.spk>i.cxd{flex:none;min-height:0;border-radius:0}
+.spk>i.cxd{border-radius:50%}
 .tlmk{font-variant-numeric:tabular-nums;font-weight:640}
 .tlmk.ds{color:var(--acc)}
 .tlgap{color:var(--hi-tx);cursor:help}
@@ -352,7 +377,7 @@ footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:v
 <b>Niche MỚI</b> chưa có trong DB 756 niche, Main niche/Type-niches được gán tự động và <b>cần người duyệt</b> trước khi nhập DB.<br>
 <b>Priority tính lại:</b> toàn bộ 3,045 niche (cả cũ lẫn mới) dùng chung một ngưỡng từ điểm search — ≥62 High · 48–62 Medium · &lt;48 Low. So với Priority đang lưu trong DB: <b style="color:var(--acc)">185 được nâng</b>, <b>147 bị hạ</b>, 300 giữ nguyên, 2 <b>được giữ nguyên vì đang trái mùa</b> (kỳ mới nhất 2026/08 nằm ngoài cao điểm nên điểm thấp không phản ánh đúng). Đây là <b>đề xuất theo nhu cầu thị trường</b>, không thay thế Priority chiến lược của team (biên lợi nhuận, năng lực sản xuất, license) — dùng filter “Priority đổi” để soát lại.<br>
 <b>Phạm vi dữ liệu:</b> 11 kỳ báo cáo tháng (2025/10 → 2026/08). Mỗi niche có biểu đồ diễn biến rank và số keyword theo từng kỳ trong trang chi tiết. Niche <b>không còn keyword nào ở kỳ mới nhất</b> bị hạ 20% volume, trừ khi đang trái mùa. Nhãn Evergreen/Seasonal dựa trên lịch lễ US + độ ổn định rank qua 11 kỳ.<br>
-Tạo lúc 17/09/2026 12:10.
+Tạo lúc 18/09/2026 13:43.
 </footer>
 </div>
 <div class="ov" id="ov"><div class="mod" id="mod"></div></div>
@@ -564,6 +589,77 @@ function open_(i){
    được cả khi không có mạng — thêm CDN là mất cả hai tính chất đó.
    Hai đường CÙNG một khung nhưng KHÁC thang đo, nên mỗi đường tự chuẩn hoá theo
    min/max của chính nó; đọc HƯỚNG ĐI chứ đừng đọc khoảng cách giữa hai đường.  */
+/* ================= HOVER: ĐỌC SỐ TẠI CHỖ CON CHUỘT ĐANG ĐỨNG =====================
+   Một engine dùng chung cho cả 3 loại biểu đồ trong trang (đường rank ở tab Radar,
+   đường volume ở modal ma trận, dải cột ở tab Lịch) thay vì mỗi chỗ tự xử lý — sửa một
+   lần là cả trang đổi theo, và không thể có chuyện hai biểu đồ hiện số theo hai kiểu.
+
+   Cách đăng ký: khung biểu đồ mang data-ch="<khoá>"; CH[khoá] là bản mô tả, hoặc một
+   HÀM nhận chỉ số dòng (dùng cho dải cột trong bảng tab Lịch — 2.268 dòng, đăng ký sẵn
+   từng dòng thì phình bộ nhớ vô ích, dựng lúc rê chuột là đủ nhanh).
+   Bản mô tả: {lab:[nhãn kỳ], x:[vị trí 0..1 của từng kỳ], s:[{n,v,y,c}], note:[]}
+     x = vị trí ngang theo TỈ LỆ khung, không phải pixel — mọi svg ở đây đều
+         preserveAspectRatio="none" nên tỉ lệ giữ đúng ở mọi bề rộng màn hình.
+     y = vị trí dọc theo tỉ lệ; null = kỳ đó không có điểm (không vẽ chấm nổi). */
+const CH={};
+const TIP=document.createElement('div'); TIP.className='tip'; document.body.appendChild(TIP);
+let CHEL=null;
+
+function chSpec(el){
+  const k=el.dataset.ch, o=CH[k];
+  return typeof o==='function' ? o(+el.dataset.i) : o;
+}
+/* Bắt KỲ GẦN NHẤT với con trỏ, không bắt "con trỏ có nằm trên chấm không". Đây là chỗ
+   ăn thua: đường cong 11 kỳ mà bắt đúng chấm 3px thì gần như không rê trúng bao giờ. */
+function chIdx(el,spec,cx){
+  const rc=el.getBoundingClientRect(); if(!rc.width) return -1;
+  const fx=(cx-rc.left)/rc.width;
+  let bi=0,bd=9;
+  spec.x.forEach((x,i)=>{const d=Math.abs(x-fx); if(d<bd){bd=d;bi=i;}});
+  return bi;
+}
+function chHide(){ if(CHEL){CHEL.classList.remove('on');CHEL=null;} TIP.style.display='none'; }
+function chMove(e){
+  const el=e.target.closest&&e.target.closest('[data-ch]');
+  if(!el){chHide();return;}
+  const spec=chSpec(el); if(!spec||!spec.x||!spec.x.length){chHide();return;}
+  const i=chIdx(el,spec,e.clientX); if(i<0){chHide();return;}
+  if(CHEL&&CHEL!==el)CHEL.classList.remove('on');
+  CHEL=el; el.classList.add('on');
+  const L=(spec.x[i]*100).toFixed(2)+'%';
+  let g=el.querySelector(':scope > .cx');
+  if(!g){g=document.createElement('i');g.className='cx';el.appendChild(g);}
+  g.style.left=L;
+  /* Chấm nổi vẽ bằng div phủ lên chứ không sửa svg: svg ở đây bị kéo giãn theo bề
+     ngang (preserveAspectRatio="none") nên chấm vẽ trong svg sẽ bị bóp thành bầu dục. */
+  spec.s.forEach((ss,k)=>{
+    let d=el.querySelector(':scope > .cxd[data-k="'+k+'"]');
+    if(!d){d=document.createElement('i');d.className='cxd';d.dataset.k=k;el.appendChild(d);}
+    const y=ss.y?ss.y[i]:null;
+    if(y==null){d.style.display='none';return;}
+    d.style.display='block'; d.style.left=L; d.style.top=(y*100).toFixed(2)+'%';
+    d.style.background=ss.c;
+  });
+  const rows=spec.s.map(ss=>{
+    const v=ss.v[i];
+    return `<s><i style="background:${ss.c}"></i>${esc(ss.n)}<em>${
+      v==null?'—':(ss.fmt?ss.fmt(v):v.toLocaleString())}</em></s>`;}).join('');
+  const nt=spec.note&&spec.note[i];
+  TIP.innerHTML=`<b>${esc(spec.lab[i])}</b>${rows}${nt?`<u>${esc(nt)}</u>`:''}`;
+  TIP.style.display='block';
+  /* Lật sang trái khi sát mép phải, lật lên khi sát đáy — hộp số bị cắt mất một nửa
+     thì đúng bằng không có. */
+  const tr=TIP.getBoundingClientRect();
+  let tx=e.clientX+14, ty=e.clientY+16;
+  if(tx+tr.width>innerWidth-8) tx=e.clientX-tr.width-14;
+  if(ty+tr.height>innerHeight-8) ty=e.clientY-tr.height-16;
+  TIP.style.left=Math.max(6,tx)+'px'; TIP.style.top=Math.max(6,ty)+'px';
+}
+document.addEventListener('pointermove',chMove,{passive:true});
+document.addEventListener('pointerleave',chHide,{passive:true});
+/* Cuộn trang hay đóng modal thì vạch/hộp phải biến mất, không được đứng lơ lửng. */
+document.addEventListener('scroll',chHide,{passive:true,capture:true});
+
 function trendBlock(r){
   const T=r.trend;
   if(!T||!T.p||T.p.length<2) return '';
@@ -589,23 +685,35 @@ function trendBlock(r){
   let dk='';
   T.nkw.forEach((v,i)=>{ dk+=(i?'L':'M')+X(i).toFixed(1)+' '+YK(v).toFixed(1)+' '; });
   const lab=p=>p.slice(5)+'/'+p.slice(2,4);
+  /* Nhãn trong hộp số ghi ĐỦ NĂM ("T10/2025"); nhãn dưới trục vẫn gọn ("10/25") vì 11
+     nhãn xếp trên 600px. */
+  const full=p=>'T'+(+p.slice(5))+'/'+p.slice(0,4);
   const dots=T.rank.map((v,i)=>v?`<circle cx="${X(i).toFixed(1)}" cy="${YR(v).toFixed(1)}" r="3"
-      fill="var(--acc)"><title>${lab(T.p[i])} · rank ${v.toLocaleString()} · ${T.nkw[i]} keyword</title></circle>`:
+      fill="var(--acc)"/>`:
       `<circle cx="${X(i).toFixed(1)}" cy="${(PT+ih).toFixed(1)}" r="2.5" fill="none"
-      stroke="var(--tx3)" stroke-dasharray="1.5 1.5"><title>${lab(T.p[i])} · không có keyword nào lọt top search</title></circle>`).join('');
+      stroke="var(--tx3)" stroke-dasharray="1.5 1.5"/>`).join('');
+  /* Đăng ký cho engine hover. Hai đường chung một trục thời gian nên rê một lần đọc
+     được cả rank lẫn số keyword của CÙNG kỳ — đó là phép đối chiếu hay dùng nhất:
+     rank tụt mà số keyword vẫn tăng thì là cạnh tranh mạnh lên, không phải niche yếu đi. */
+  CH.trend={lab:T.p.map(full), x:T.p.map((_,i)=>X(i)/W),
+    s:[{n:'Rank tốt nhất', c:'var(--acc)', v:T.rank.map(v=>v||null),
+        y:T.rank.map(v=>v?YR(v)/H:null), fmt:v=>'#'+v.toLocaleString()},
+       {n:'Số keyword', c:'var(--acc2)', v:T.nkw.slice(), y:T.nkw.map(v=>YK(v)/H)}],
+    note:T.rank.map(v=>v?'':'Kỳ này niche không có keyword nào lọt top search — nét bị ngắt ở đây.')};
   const xlab=T.p.map((p,i)=>`<text x="${X(i).toFixed(1)}" y="${H-10}" fill="var(--tx3)"
       font-size="10" text-anchor="middle">${lab(p)}</text>`).join('');
   const nmiss=T.rank.filter(v=>!v).length;
   return `<div class="sec"><h4>Diễn biến ${n} kỳ (${lab(T.p[0])} → ${lab(T.p[n-1])})</h4>
    <div class="lgd"><span><i style="background:var(--acc)"></i>Rank tốt nhất (thang log, đảo ngược — cao = mạnh)</span>
      <span><i style="background:var(--acc2)"></i>Số keyword lọt top search (0–${km})</span></div>
+   <div class="chw" data-ch="trend">
    <svg viewBox="0 0 ${W} ${H}" class="trd" preserveAspectRatio="none">
      <path d="${dk}" fill="none" stroke="var(--acc2)" stroke-width="1.6"
        stroke-opacity=".75" stroke-dasharray="4 3"/>
      <path d="${d}" fill="none" stroke="var(--acc)" stroke-width="2.2"
        stroke-linejoin="round" stroke-linecap="round"/>
      ${dots}${xlab}
-   </svg>
+   </svg></div>
    <div class="note" style="font-size:11.5px">
      Rank kỳ mới nhất: <b>${r.last_rank?r.last_rank.toLocaleString():'không có mặt'}</b> ·
      tốt nhất cả ${n} kỳ: <b>${r.best_rank.toLocaleString()}</b> ·
@@ -788,10 +896,19 @@ function mxCurve(ser,tl){
     fill="var(--acc)" fill-opacity=".10" stroke="none"/>`:'';
   const dots=ser.map((v,i)=>{
     if(v==null)return `<circle cx="${X(i).toFixed(1)}" cy="${PT+ih}" r="2.5" fill="none"
-      stroke="var(--tx3)" stroke-dasharray="1.5 1.5"><title>${TLAB[i]}: không keyword nào của ô lọt top search</title></circle>`;
+      stroke="var(--tx3)" stroke-dasharray="1.5 1.5"/>`;
     const pk=v===pv;
     return `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${pk?4.5:3}"
-      fill="${pk?'var(--up-tx)':'var(--acc)'}"><title>${TLAB[i]}: ${v.toLocaleString()} volume</title></circle>`;}).join('');
+      fill="${pk?'var(--up-tx)':'var(--acc)'}"/>`;}).join('');
+  /* Đăng ký hover. Ngoài volume, hộp số nói luôn kỳ đó ĐANG Ở ĐÂU TRONG MÙA của chính
+     ô này (đỉnh / vào mùa / lên listing / bắt đầu design) — người đọc đang hỏi "tháng
+     này đã phải làm chưa", trả lời bằng mỗi con số thì vẫn phải tự dò bằng mắt. */
+  const mkOf=i=>{const m=TLMS[i]; if(!tl)return '';
+    return m===tl.peak_m?'Đỉnh mùa':m===tl.ramp_m?'Bắt đầu vào mùa'
+         :m===tl.list_m?'Mốc lên listing':m===tl.design_m?'Mốc bắt đầu design':'';};
+  CH.mxc={lab:TLAB.slice(), x:ser.map((_,i)=>X(i)/W),
+    s:[{n:'Volume', c:'var(--acc)', v:ser.slice(), y:ser.map(v=>v==null?null:Y(v)/H)}],
+    note:ser.map((v,i)=>v==null?'Kỳ này không keyword nào của ô lọt top search.':mkOf(i))};
   /* Ghi SỐ ngay trên đỉnh: con số người ta tìm đầu tiên, bắt rê chuột để biết là dở. */
   const pi=ser.indexOf(pv);
   const ptx=`<text x="${X(pi).toFixed(1)}" y="${Math.max(11,Y(pv)-9).toFixed(1)}" fill="var(--up-tx)"
@@ -807,9 +924,10 @@ function mxCurve(ser,tl){
       stroke="var(--tm-tx)" stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".8"/>
       <text x="${X(ri).toFixed(1)}" y="${H-5}" fill="var(--tm-tx)" font-size="9.5"
       text-anchor="middle">vào mùa</text>`;}
-  return `<svg viewBox="0 0 ${W} ${H}" class="trd" style="height:150px" preserveAspectRatio="none">
+  return `<div class="chw" data-ch="mxc">
+    <svg viewBox="0 0 ${W} ${H}" class="trd" style="height:150px" preserveAspectRatio="none">
     ${area}${mk}<path d="${d}" fill="none" stroke="var(--acc)" stroke-width="2.2"
-      stroke-linejoin="round" stroke-linecap="round"/>${dots}${ptx}${xl}</svg>`;
+      stroke-linejoin="round" stroke-linecap="round"/>${dots}${ptx}${xl}</svg></div>`;
 }
 
 function mxCell(n,s,p){
@@ -878,7 +996,7 @@ const TLBYD={}; TL.forEach(x=>{if(x.design_m){(TLBYD[x.design_m]=TLBYD[x.design_
 const TLCELL={}; TL.forEach(x=>TLCELL[x.niche+'\u0000'+x.sub+'\u0000'+x.prod]=x);
 const TLPRODS=[...new Set(TL.map(x=>x.prod))].sort();
 
-function tlSpark(x){
+function tlSpark(x,ref){
   /* Xếp theo KỲ THẬT (10/2025 -> 08/2026), không gập về vòng 1..12. Bản đầu xếp 1..12
      nên T10-T12/2025 rơi xuống cuối dải, đọc ngược hẳn dòng thời gian — anh Ngọc bác.
      Hệ quả: 11 kỳ LIỀN MẠCH, không còn cột gạch chéo. Tháng 9 thiếu nằm NGOÀI dải
@@ -889,12 +1007,29 @@ function tlSpark(x){
     const m=x.months[i];
     /* v==null = kỳ có báo cáo nhưng không keyword nào của ô lọt top search. Khác hẳn
        "Amazon chưa ra báo cáo" — trường hợp đó nay không còn xuất hiện trong dải. */
-    if(v==null){h+=`<i title="${TLAB[i]}: có báo cáo nhưng không keyword nào của ô lọt top"></i>`;return;}
+    if(v==null){h+='<i></i>';return;}
     const cl=m===x.peak_m?'pk':m===x.design_m?'ds':m===x.ramp_m?'rp':'';
-    h+=`<i class="${cl}" style="height:${Math.max(2,Math.sqrt(v)/mx*30)}px"
-      title="${TLAB[i]}: ${v.toLocaleString()} volume"></i>`;});
-  return `<div class="spk">${h}</div>`;
+    h+=`<i class="${cl}" style="height:${Math.max(2,Math.sqrt(v)/mx*30)}px"></i>`;});
+  /* Bỏ title từng cột, chuyển sang engine hover chung: dải này cao 30px và rộng ~170px,
+     mỗi cột chỉ ~13px — rê trúng cột thì được, nhưng phải đợi trình duyệt 1 giây mới
+     thấy số, mà bảng có 2.268 dòng thì thao tác thật là lướt dọc rồi dừng lại xem, đợi
+     một giây mỗi lần là bỏ luôn. Vạch dọc + hộp số hiện tức thì mới dùng được. */
+  return `<div class="spk chw" ${ref||''}>${h}</div>`;
 }
+/* Bản mô tả hover cho một dòng lịch. Dựng lúc rê chuột chứ không đăng ký sẵn 2.268
+   dòng — bảng render lại mỗi lần lọc, đăng ký sẵn là vừa phình vừa dễ ôi số cũ. */
+function tlSpec(x){
+  if(!x)return null;
+  const mx=Math.sqrt(x.peak_v)||1, n=x.series.length;
+  const mk=m=>m===x.peak_m?'Đỉnh mùa':m===x.ramp_m?'Bắt đầu vào mùa'
+           :m===x.list_m?'Mốc lên listing':m===x.design_m?'Mốc bắt đầu design':'';
+  return {lab:TLAB.slice(), x:x.series.map((_,i)=>(i+0.5)/n),
+    s:[{n:'Volume', c:'var(--acc)', v:x.series.slice(),
+        y:x.series.map(v=>v==null?null:1-Math.max(2,Math.sqrt(v)/mx*30)/30)}],
+    note:x.series.map((v,i)=>v==null?'Kỳ này không keyword nào của ô lọt top search.'
+                                    :mk(x.months[i]))};
+}
+CH.tlrow=i=>tlSpec(TLROWS[i]);
 const TLH=[['','#',0,0,0],['niche','Niche',0,1,0],['prod','Sản phẩm',0,1,0],
   ['kind','Loại mùa',0,1,0],['','Đường cong 11 kỳ',0,0,0],
   ['design_m','BẮT ĐẦU DESIGN',0,0,0],['ramp_m','Tăng từ',0,0,0],['peak_m','Đỉnh',0,0,0],
@@ -939,7 +1074,7 @@ function tlRender(){
     <td class="nm" title="${esc(x.niche)}">${esc(cut(x.niche,34))}</td>
     <td style="color:var(--tx2)">${esc(x.prod)}</td>
     <td><span class="kd ${x.kind==='Mùa vụ mạnh'?'s2':x.kind==='Có mùa'?'s1':'s0'}">${esc(x.kind)}</span></td>
-    <td>${tlSpark(x)}</td>
+    <td>${tlSpark(x,`data-ch="tlrow" data-i="${i}"`)}</td>
     <td class="tlmk ds">${x.design_m?MVN[x.design_m]:'—'}</td>
     <td class="tlmk">${MVN[x.ramp_m]}${x.gap?'<span class="tlgap" title="Mùa kéo qua tháng chưa có báo cáo Amazon — mốc này là suy ra bằng cách kẹp hai đầu, không phải số đo."> *</span>'
       :x.blind?'<span class="tlgap" title="Đi ngược từ tháng đỉnh thì đụng ngay tháng chưa có báo cáo Amazon rồi phải dừng. Mốc này là SÀN — mùa có thể đã bắt đầu sớm hơn 1 tháng, nên cộng thêm 1 tháng lead."> ?</span>':''}</td>
@@ -983,7 +1118,7 @@ function tlCell(i){
             :x.blind?`<br><span style="color:var(--hi-tx)">⚠ Đi ngược từ tháng đỉnh thì đụng ngay ${TLMISS.map(m=>MVN[m]).join(', ')} — tháng chưa có báo cáo Amazon — nên phải dừng ở đây. Mốc "vào mùa" ${MVN[x.ramp_m]} chỉ là SÀN: mùa có thể đã khởi động sớm hơn 1 tháng mà data không nhìn thấy. Nên cộng thêm 1 tháng lead cho ô này.</span>`:''}`}
     </div></div>
     <div class="sec"><h4>Volume ước tính theo kỳ</h4>
-      <div style="margin:6px 0 10px">${tlSpark(x)}</div>
+      <div style="margin:6px 0 10px">${(CH.tlm=tlSpec(x))&&tlSpark(x,'data-ch="tlm"')}</div>
       <table><thead><tr><th style="width:84px">Kỳ</th><th style="width:150px;text-align:right">Volume</th>
       <th>Mốc</th></tr></thead><tbody>${bars.join('')}</tbody></table></div>
     <div class="sec"><div class="note w">Đây là chu kỳ đọc từ MỘT năm dữ liệu. Với niche mới
